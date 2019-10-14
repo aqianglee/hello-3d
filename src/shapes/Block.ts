@@ -1,7 +1,7 @@
 import { Shape } from "./Shape";
 import { Camera } from "../Camera";
 import { Point } from "../Point";
-import { Point2d } from "../Poiny2D";
+import { Point2d } from "../Point2D";
 
 class Block implements Shape {
     private p1: Point;
@@ -13,36 +13,67 @@ class Block implements Shape {
     private p7: Point;
     private p8: Point;
 
-    constructor(point: Point, point2:Point) {
-        this.p1 = new Point(point.getX(), point.getY(), point.getZ());
-        this.p2 = new Point(point.getX(), point.getY(), point2.getZ());
-        this.p3 = new Point(point.getX(), point2.getY(), point.getZ());
-        this.p4 = new Point(point.getX(), point2.getY(), point2.getZ());
-        this.p5 = new Point(point2.getX(), point.getY(), point.getZ());
-        this.p6 = new Point(point2.getX(), point.getY(), point2.getZ());
-        this.p7 = new Point(point2.getX(), point2.getY(), point.getZ());
-        this.p8 = new Point(point2.getX(), point2.getY(), point2.getZ());
+    private size: number;
+    private positon: Point;
+
+    constructor(x: number, y:number, z: number) {
+        this.size = 100;
+        this.positon = new Point(x * 100, y * 100, z * 100);
+        this.p1 = new Point(x * this.size - this.size / 2, y * this.size - this.size / 2, z * this.size - this.size / 2);
+        this.p2 = new Point(x * this.size - this.size / 2, y * this.size + this.size / 2, z * this.size - this.size / 2);
+        this.p3 = new Point(x * this.size + this.size / 2, y * this.size + this.size / 2, z * this.size - this.size / 2);
+        this.p4 = new Point(x * this.size + this.size / 2, y * this.size - this.size / 2, z * this.size - this.size / 2);
+
+        this.p5 = new Point(x * this.size - this.size / 2, y * this.size - this.size / 2, z * this.size + this.size / 2);
+        this.p6 = new Point(x * this.size - this.size / 2, y * this.size + this.size / 2, z * this.size + this.size / 2);
+        this.p7 = new Point(x * this.size + this.size / 2, y * this.size + this.size / 2, z * this.size + this.size / 2);
+        this.p8 = new Point(x * this.size + this.size / 2, y * this.size - this.size / 2, z * this.size + this.size / 2);
     }
 
     paint(ctx:CanvasRenderingContext2D, camera: Camera) {
-        let p12d = new Point2d(this.p1, camera);
-        let p22d = new Point2d(this.p2, camera);
-        let p32d = new Point2d(this.p3, camera);
-        let p42d = new Point2d(this.p4, camera);
-        let p52d = new Point2d(this.p5, camera);
-        let p62d = new Point2d(this.p6, camera);
-        let p72d = new Point2d(this.p7, camera);
-        let p82d = new Point2d(this.p8, camera);
+        let p12d = new Point2d(this.p1, camera, this.positon);
+        let p22d = new Point2d(this.p2, camera, this.positon);
+        let p32d = new Point2d(this.p3, camera, this.positon);
+        let p42d = new Point2d(this.p4, camera, this.positon);
+        let p52d = new Point2d(this.p5, camera, this.positon);
+        let p62d = new Point2d(this.p6, camera, this.positon);
+        let p72d = new Point2d(this.p7, camera, this.positon);
+        let p82d = new Point2d(this.p8, camera, this.positon);
 
-        this.draw(ctx, p12d, p52d, p62d, p22d, '#00F');
-        this.draw(ctx, p32d, p42d, p82d, p72d, '#0FF');
+        if(camera.getPosition().getZ()   >= this.positon.getZ()) {
+            //this.draw(ctx, p12d, p22d, p32d, p42d, 'green');
+            this.drawLeftAndRight(camera, ctx, p12d, p22d, p32d, p42d, p52d, p62d, p72d, p82d);
+            this.draw(ctx, p52d, p62d, p72d, p82d, 'brown');
+        } else {
+            //this.draw(ctx, p52d, p62d, p72d, p82d, 'brown');
+            this.drawLeftAndRight(camera, ctx, p12d, p22d, p32d, p42d, p52d, p62d, p72d, p82d);
+            this.draw(ctx, p12d, p22d, p32d, p42d, 'green');
+        }
+    }
 
-        // this.draw(ctx, p12d, p52d, p72d, p32d, '#F00');
-        // this.draw(ctx, p22d, p62d, p82d, p42d, '#0F0');
+    private drawLeftAndRight(camera: Camera, ctx: CanvasRenderingContext2D, p12d: Point2d, p22d: Point2d, p32d: Point2d, p42d: Point2d, p52d: Point2d, p62d: Point2d, p72d: Point2d, p82d: Point2d) {
+        if (camera.getPosition().getX() >= this.positon.getX()) {
+            this.draw(ctx, p12d, p52d, p82d, p42d, 'brown');
+            this.drawFontAndBack(camera, ctx, p12d, p22d, p32d, p42d, p52d, p62d, p72d, p82d);
+            this.draw(ctx, p22d, p62d, p72d, p32d, 'brown');
+        }
+        else {
+            this.draw(ctx, p22d, p62d, p72d, p32d, 'brown');
+            this.drawFontAndBack(camera, ctx, p12d, p22d, p32d, p42d, p52d, p62d, p72d, p82d);
+            this.draw(ctx, p12d, p52d, p82d, p42d, 'brown');
+        }
+        this.draw(ctx, p52d, p62d, p72d, p82d, 'brown');
+    }
 
-
-        // this.draw(ctx, p12d, p22d, p42d, p32d, '#FF0');
-        // this.draw(ctx, p52d, p72d, p82d, p62d, '#F0F');
+    private drawFontAndBack(camera: Camera, ctx: CanvasRenderingContext2D, p12d: Point2d, p22d: Point2d, p32d: Point2d, p42d: Point2d, p52d: Point2d, p62d: Point2d, p72d: Point2d, p82d: Point2d) {
+        if (camera.getPosition().getY() >= this.positon.getY()) {
+            this.draw(ctx, p12d, p22d, p62d, p52d, 'brown');
+            this.draw(ctx, p32d, p42d, p82d, p72d, 'brown');
+        }
+        else {
+            this.draw(ctx, p32d, p42d, p82d, p72d, 'brown');
+            this.draw(ctx, p12d, p22d, p62d, p52d, 'brown');
+        }
     }
 
     draw(ctx:CanvasRenderingContext2D, p:Point2d, p2:Point2d, p3:Point2d, p4:Point2d, color:string):void {
@@ -54,6 +85,7 @@ class Block implements Shape {
         ctx.lineTo(p4.getX(), p4.getY());
         ctx.closePath();
         ctx.fill();
+        ctx.stroke();
     }
 }
 
